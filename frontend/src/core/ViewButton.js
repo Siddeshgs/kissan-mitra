@@ -1,17 +1,12 @@
-import React, { useState, useEffect } from "react";
-import {isAuthenticated} from "../auth";
+import React from "react";
+import { isAuthenticated } from "../auth";
 import "./nav.css";
-import View from "./viewVegetables";
 
-const ViewButton = ({handleFilters }) => {
-
-    const {user} = isAuthenticated();
-
-    const [value, setValue] = useState(0);
+const ViewButton = ({ handleFilters }) => {
+    const { user } = isAuthenticated();
 
     const handleChange = event => {
         handleFilters(event.target.value);
-        setValue(event.target.value);
     };
 
     return  (

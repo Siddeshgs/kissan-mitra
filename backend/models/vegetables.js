@@ -1,41 +1,34 @@
 const mongoose=require('mongoose');
 const {ObjectId}=mongoose.Schema;
-const vegetableSchema=new mongoose.Schema({
-    name:{
+const vegetableSchema = new mongoose.Schema({
+    name: {
         type: String,
         trim: true,
         required: true,
-        maxlength: 32
+        maxlength: 64
     },
-    price:{
+    price: {
         type: Number,
-        trim: true,
-        required: true,
-        maxlength: 32
+        required: true
     },
-    quantity:{
+    quantity: {
         type: Number,
-        trim: true,
-        required: true,
-        maxlength: 32
+        required: true
     },
-    farmer_id:{
+    farmer_id: {
         type: ObjectId,
-        ref:"User"
-        
+        ref: "User"
     },
-    photo:{
-        data:Buffer,
-        contentType:String,
+    photo: {
+        data: Buffer,
+        contentType: String,
     },
     sold: {
         type: Number,
         default: 0
     },
 },
-   
-{timestamps:true}
-
+{ timestamps: true }
 );
 
 

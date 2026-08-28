@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Layout from "../core/Layout";
 import { isAuthenticated } from "../auth";
-import { Link, Redirect } from "react-router-dom";
+import { Redirect } from "react-router-dom";
 import { read, update, updateUser } from "./apiUser";
 
 const Profile = ({ match }) => {
@@ -15,22 +15,27 @@ const Profile = ({ match }) => {
     });
 
     const { token } = isAuthenticated();
-    const { name, email, password, location, error, success } = values;
+    const { name, email, password, location, success } = values;
 
     const init = userId => {
-        // console.log(userId);
         read(userId, token).then(data => {
-            if (data.error) {
-                setValues({ ...values, error: true });
-            } else {
-                setValues({ ...values, name: data.name, email: data.email });
+            if (data && data.error) {
+                setValues(v => ({ ...v, error: true }));
+            } else if (data) {
+                setValues(v => ({
+                    ...v,
+                    name: data.name || "",
+                    email: data.email || "",
+                    location: data.location || ""
+                }));
             }
         });
     };
 
     useEffect(() => {
         init(match.params.userId);
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [match.params.userId]);
 
     const handleChange = name => e => {
         setValues({ ...values, error: false, [name]: e.target.value });
@@ -40,9 +45,9 @@ const Profile = ({ match }) => {
         e.preventDefault();
         update(match.params.userId, token, { name, email, password, location }).then(
             data => {
-                if (data.error) {
-                    console.lgo(data.error);
-                } else {
+                if (data && data.error) {
+                    console.log(data.error);
+                } else if (data) {
                     updateUser(data, () => {
                         setValues({
                             ...values,
@@ -107,6 +112,7 @@ const Profile = ({ match }) => {
                                 onChange={handleChange("location")}
                                 className="form-control"
                                 placeholder="State Location" 
+                                value={location}
                             >
 
                             <option type="text" value={""}>Select State</option>

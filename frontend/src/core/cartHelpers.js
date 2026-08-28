@@ -54,7 +54,7 @@ export const updateItem = (vegetableId, count) => {
             cart = JSON.parse(localStorage.getItem("cart"));
         }
 
-        cart.map((vegetable, i) => {
+        cart.forEach((vegetable, i) => {
             if (vegetable._id === vegetableId) {
                 cart[i].count = count;
             }
@@ -72,7 +72,7 @@ export const removeItem = vegetableId => {
             cart = JSON.parse(localStorage.getItem("cart"));
         }
 
-        cart.map((vegetable, i) => {
+        cart.forEach((vegetable, i) => {
             if (vegetable._id === vegetableId) {
                 cart.splice(i, 1);
             }

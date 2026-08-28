@@ -21,40 +21,37 @@ const Menu = ({ history }) => (
 				<Navbar.Collapse id='responsice-navbar-nav'>
 					<Link className="navbar-brand" to={"/"}>Kisaan Mitra</Link>
 					<Nav className="mine">
-						<Nav.Link style={isActive(history, "/")} href="/">Home</Nav.Link>
+						<Nav.Link as={Link} style={isActive(history, "/")} to="/">Home</Nav.Link>
 
-                        {isAuthenticated()&& isAuthenticated().user.role === 0 && (
-						<Nav.Link style={isActive(history, "/buy")} href="/buy">BuyNow</Nav.Link>
-			
+                        {isAuthenticated() && isAuthenticated().user.role === 0 && (
+						<Nav.Link as={Link} style={isActive(history, "/buy")} to="/buy">BuyNow</Nav.Link>
 						)}
 
-						{isAuthenticated()&& isAuthenticated().user.role === 0 && (
-						<Nav.Link style={isActive(history, "/user/dashboard")} href="/user/dashboard">Dashboard</Nav.Link>
-			
+						{isAuthenticated() && isAuthenticated().user.role === 0 && (
+						<Nav.Link as={Link} style={isActive(history, "/user/dashboard")} to="/user/dashboard">Dashboard</Nav.Link>
 						)}
 	
-						{isAuthenticated()&& isAuthenticated().user.role === 1 && (
-						<Nav.Link style={isActive(history, "/farmer/dashboard")} href="/farmer/dashboard">Dashboard</Nav.Link>
+						{isAuthenticated() && isAuthenticated().user.role === 1 && (
+						<Nav.Link as={Link} style={isActive(history, "/farmer/dashboard")} to="/farmer/dashboard">Dashboard</Nav.Link>
 						)}
 
-                        {isAuthenticated()&& isAuthenticated().user.role === 0 && (
-						<Nav.Link style={isActive(history, "/cart")} href="/cart">Cart{""}
+                        {isAuthenticated() && isAuthenticated().user.role === 0 && (
+						<Nav.Link as={Link} style={isActive(history, "/cart")} to="/cart">Cart{""}
                             <sup>
                                 <small className="cart-badge">{itemTotal()}</small>
                             </sup>
                         </Nav.Link>
-			
 						)}
 
 						{!isAuthenticated() && (
                     <Fragment>
-                        <Nav.Link style={isActive(history, "/signin")} href="/signin">Signin</Nav.Link>
-						<Nav.Link style={isActive(history, "/signup")} href="/signup">Signup</Nav.Link>
+                        <Nav.Link as={Link} style={isActive(history, "/signin")} to="/signin">Signin</Nav.Link>
+						<Nav.Link as={Link} style={isActive(history, "/signup")} to="/signup">Signup</Nav.Link>
                     </Fragment>
                 )}
 				
 					{isAuthenticated() && (
-                    <Nav.Link>
+                    <Nav.Link as="span">
                         <span
                             style={{ cursor: "pointer", color: "red" }}
                             onClick={() =>

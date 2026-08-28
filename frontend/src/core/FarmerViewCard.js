@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, Redirect } from "react-router-dom";
+import { Redirect } from "react-router-dom";
 import moment from "moment";
 import ShowImage from "./ShowImage"
 import { isAuthenticated } from "../auth";
@@ -15,8 +15,13 @@ const FCard = ({ vegetable, showAddToCartButton = true, showRemoveVegetableButto
     const remain = vegetable.quantity - vegetable.sold;
 
     const removeCall = () => {
-        removeVegetable(vegetable._id, user._id, token, () => {
-        setRedirect(true);
+        removeVegetable(vegetable._id, user._id, token).then(data => {
+            if (data && data.error) {
+                console.log(data.error);
+            } else {
+                setRedirect(true);
+                setRun(!run);
+            }
         });
     };
 

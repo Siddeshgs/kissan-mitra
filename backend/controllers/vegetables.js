@@ -23,12 +23,10 @@ exports.read = (req, res) => {
 };
 
 exports.add = (req, res) => {
-    
     let form = new formidable.IncomingForm();
     console.log("add");
     form.keepExtensions = true;
     form.parse(req, (err, fields, files) => {
-        console.log(fields.price);
         if (err) {
             console.log(err);
             return res.status(400).json({
@@ -53,7 +51,6 @@ exports.add = (req, res) => {
         let vegetables = new Vegetables(fields);
 
         if (files.photo) {
-            console.log(files.photo)
             vegetables.photo.data = fs.readFileSync(files.photo.path);
             vegetables.photo.contentType = files.photo.type;
         }
@@ -61,7 +58,7 @@ exports.add = (req, res) => {
         vegetables.save((err, result) => {
             if (err) {
                 console.log(err);
-                return res.staus(400).json({
+                return res.status(400).json({
                     error: errorHandler(err)
                 });
             }
@@ -72,7 +69,7 @@ exports.add = (req, res) => {
 };
 
 exports.remove = (req, res) => {
-    console.log("remove")
+    console.log("remove");
     let vegetable = req.vegetable;
     vegetable.remove((err, deleteVegetable) => {
         if (err) {
@@ -89,12 +86,10 @@ exports.remove = (req, res) => {
 };
   
 exports.update = (req, res) => {
-    
     let form = new formidable.IncomingForm();
     console.log("update");
     form.keepExtensions = true;
     form.parse(req, (err, fields, files) => {
-        console.log(fields.price);
         if (err) {
             console.log(err);
             return res.status(400).json({
@@ -117,10 +112,9 @@ exports.update = (req, res) => {
             });
         }
         let vegetables = req.vegetable;
-        vegetable = _.extend(vegetables, fields)
+        vegetables = _.extend(vegetables, fields);
 
         if (files.photo) {
-            console.log(files.photo)
             vegetables.photo.data = fs.readFileSync(files.photo.path);
             vegetables.photo.contentType = files.photo.type;
         }
@@ -128,7 +122,7 @@ exports.update = (req, res) => {
         vegetables.save((err, result) => {
             if (err) {
                 console.log(err);
-                return res.staus(400).json({
+                return res.status(400).json({
                     error: errorHandler(err)
                 });
             }
@@ -166,7 +160,7 @@ exports.list = (req, res) => {
 };
 
 exports.photo = (req, res, next) => {
-    if (req.vegetable.photo.data) {
+    if (req.vegetable.photo && req.vegetable.photo.data) {
         res.set("Content-Type", req.vegetable.photo.contentType);
         return res.send(req.vegetable.photo.data);
     }
@@ -186,11 +180,8 @@ exports.photo = (req, res, next) => {
     let order = req.body.order ? req.body.order : "desc";
     let sortBy = req.body.sortBy ? req.body.sortBy : "_id";
     let limit = req.body.limit ? parseInt(req.body.limit) : 100;
-    let skip = parseInt(req.body.skip);
+    let skip = parseInt(req.body.skip) || 0;
     let findArgs = {};
-
-    // console.log(order, sortBy, limit, skip, req.body.filters);
-    // console.log("findArgs", findArgs);
 
     for (let key in req.body.filters) {
         if (req.body.filters[key].length > 0) {
@@ -229,20 +220,22 @@ exports.photo = (req, res, next) => {
 
 
 exports.listSearch = (req, res) => {
-    // create query object to hold search value and category value
     const query = {};
-    cosole.log(req.body);
-    // assign search value to query.name
     if (req.query.name) {
         query.name = { $regex: req.query.name, $options: "i" };
-        console.log("name", query.name);
-        // assigne category value to query.category
-        if (req.query.farmer_id && req.query.farmer_id != "All") {
+        if (req.query.farmer_id && req.query.farmer_id !== "All") {
             query.farmer_id = req.query.farmer_id;
         }
-        // find the product based on query object with 2 properties
-        // search and category
         Vegetables.find(query, (err, vegetables) => {
+            if (err) {
+                return res.status(400).json({
+                    error: errorHandler(err)
+                });
+            }
+            res.json(vegetables);
+        }).select("-photo");
+    } else {
+        Vegetables.find((err, vegetables) => {
             if (err) {
                 return res.status(400).json({
                     error: errorHandler(err)

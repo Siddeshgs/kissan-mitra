@@ -10,13 +10,10 @@ const Home = () => {
 
     const [VegetablesBySell, setVegetablesBySell] = useState([]);
     const [VegetablesByArrival, setVegetablesByArrival] = useState([]);
-    const [error, setError] = useState(false);
 
     const loadVegetablesBySell = () => {
         getVegetables("sold").then(data => {
-            if (data.error) {
-                setError(data.error);
-            } else {
+            if (data && Array.isArray(data)) {
                 setVegetablesBySell(data);
             }
         });
@@ -24,9 +21,7 @@ const Home = () => {
 
     const loadVegetablesByArrival = () => {
         getVegetables("createdAt").then(data => {
-            if (data.error) {
-                setError(data.error);
-            } else {
+            if (data && Array.isArray(data)) {
                 setVegetablesByArrival(data);
             }
         });
@@ -44,13 +39,9 @@ const Home = () => {
             className="container-fluid" >
             
             <h3 className = "info_dashboard"> ಜೈ ಜವಾನ್ ! ಜೈ ಕಿಸಾನ್ ! </h3>
-			{!isAuthenticated() && (
-            <CarouselPage />
-            )}
-
             {(!isAuthenticated() || isAuthenticated().user.role === 1) && (
-  <CarouselPage />
-)}
+                <CarouselPage />
+            )}
 
                 
             {isAuthenticated() && isAuthenticated().user.role === 0 &&  (

@@ -1,60 +1,46 @@
 import React, { useState, useEffect } from "react";
 import Layout from "./Layout";
-import Search from "./Search";
 import Card from "./Card";
-import {getFarmers, getFilteredVegetables} from "./apiCore";
+import { getFarmers, getFilteredVegetables } from "./apiCore";
 import Checkbox from "./Checkbox";
 import RadioBox from "./RadioBox";
 import { prices } from "./fixedPrices";
 
 const Buy = () => {
-
     const [myFilters, setMyFilters] = useState({
         filters: { farmer_id: [], price: [] }
     });
 
     const [farmers, setFarmers] = useState([]);
-    const [error, setError] = useState(false);
-    const [limit, setLimit] = useState(6);
+    const limit = 6;
     const [skip, setSkip] = useState(0);
     const [size, setSize] = useState(0);
     const [filteredResults, setFilteredResults] = useState([]);
 
     const init = () => {
         getFarmers().then(data => {
-            if (data.error) {
-                setError(data.error);
-            } else {
+            if (data && Array.isArray(data)) {
                 setFarmers(data);
             }
         });
     };
     const loadFilteredResults = newFilters => {
-        console.log("New Filters ",newFilters);
         getFilteredVegetables(skip, limit, newFilters).then(data => {
-            if (data.error) {
-                setError(data.error);
-            } else {
+            if (data && data.data) {
                 setFilteredResults(data.data);
-                setSize(data.size);
+                setSize(data.size || 0);
                 setSkip(0);
-
-                console.log("Results ", filteredResults);
             }
         });
     };
 
     const loadMore = () => {
         let toSkip = skip + limit;
-        // console.log(newFilters);
         getFilteredVegetables(toSkip, limit, myFilters.filters).then(data => {
-            if (data.error) {
-                setError(data.error);
-            } else {
+            if (data && data.data) {
                 setFilteredResults([...filteredResults, ...data.data]);
-                setSize(data.size);
+                setSize(data.size || 0);
                 setSkip(toSkip);
-                console.log("Results ",filteredResults);
             }
         });
     };
@@ -72,7 +58,8 @@ const Buy = () => {
 
     useEffect(() => {
         init();
-        loadFilteredResults(skip, limit, myFilters.filters);
+        loadFilteredResults(myFilters.filters);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleFilters = (filters, filterBy) => {
@@ -84,7 +71,7 @@ const Buy = () => {
             let priceValues = handlePrice(filters);
             newFilters.filters[filterBy] = priceValues;
         }
-        loadFilteredResults(myFilters.filters);
+        loadFilteredResults(newFilters.filters);
         setMyFilters(newFilters);
         console.log("New Filters ", newFilters);
     };

@@ -1,15 +1,12 @@
-import React, { useState, useEffect } from "react";
-import Layout from "./Layout";
-import { getVegetables } from "./apiCore";
-import Card from "./Card";
+import React from "react";
 import { isAuthenticated } from "../auth";
 import { Link } from "react-router-dom";
 
-const Checkout = ({ vegetables }) => {
-
+const Checkout = ({ vegetables = [] }) => {
     const getTotal = () => {
+        if (!Array.isArray(vegetables)) return 0;
         return vegetables.reduce((currentValue, nextValue) => {
-            return currentValue + nextValue.count * nextValue.price;
+            return currentValue + (nextValue.count || 1) * (nextValue.price || 0);
         }, 0);
     };
 

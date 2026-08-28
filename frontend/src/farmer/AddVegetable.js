@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Layout from "../core/Layout";
 import { isAuthenticated } from "../auth";
-import { Link } from "react-router-dom";
 import { createVegetable } from "./apiFarmer";
 
 const AddVegetable = () => {
@@ -9,12 +8,10 @@ const AddVegetable = () => {
         name: "",
         price: "",
         quantity: "",
-        farmer_id:"",
         photo: "",
         loading: false,
         error: "",
         createdVegetable: "",
-        redirectToProfile: false,
         formData: ""
     });
 
@@ -24,22 +21,27 @@ const AddVegetable = () => {
         name,
         price,
         quantity,
-        farmer_id,
         loading,
         error,
         createdVegetable,
-        redirectToProfile,
         formData
     } = values;
 
     useEffect(() => {
-        setValues({ ...values, formData: new FormData() });
+        const data = new FormData();
+        if (user && user._id) {
+            data.set("farmer_id", user._id);
+        }
+        setValues(v => ({ ...v, formData: data }));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleChange = name => event => {
         const value =
             name === "photo" ? event.target.files[0] : event.target.value;
-        formData.set(name, value);
+        if (formData) {
+            formData.set(name, value);
+        }
         setValues({ ...values, [name]: value });
     };
 
@@ -47,10 +49,14 @@ const AddVegetable = () => {
         event.preventDefault();
         setValues({ ...values, error: "", loading: true });
 
+        if (formData && user && user._id) {
+            formData.set("farmer_id", user._id);
+        }
+
         createVegetable(user._id, token, formData)
         .then(data => {
-            if (data.error) {
-                setValues({ ...values, error: data.error });
+            if (!data || data.error) {
+                setValues({ ...values, error: (data && data.error) || "Failed to add vegetable", loading: false });
             } else {
                 setValues({
                     ...values,

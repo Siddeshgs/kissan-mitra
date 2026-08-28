@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, Redirect } from "react-router-dom";
+import { Redirect } from "react-router-dom";
 import moment from "moment";
 import ShowImage from "./ShowImage"
 import { addItem, updateItem, removeItem } from "./cartHelpers"

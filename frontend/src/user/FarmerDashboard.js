@@ -1,84 +1,68 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Layout from "../core/Layout";
 import { isAuthenticated } from "../auth";
 import { Link } from "react-router-dom";
+
 const FarmerDashboard = () => {
     const {
-        user: { _id, name, email, location, role}
+        user: { _id, name, email, location, role }
     } = isAuthenticated();
 
-//     window.open = function() {
-//         GetInfo();
-//         onloadData();
-//     };
-    document.addEventListener('readystatechange', event => { 
-        // When HTML/DOM elements are ready:
-        if (document.readyState === "loading") {   //does same as:  ..addEventListener("DOMContentLoaded"..
-            
-        }
-    	
-        // When window loaded ( external resources are loaded too- `css`,`src`, etc...) 
-        if (document.readyState === "complete") {
+    useEffect(() => {
+        if (location) {
             GetInfo();
             onloadData();
         }
-    });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [location]);
 
-    const GetInfo= ()=> {
+    const GetInfo = () => {
+        if (!location) return;
+        fetch('https://api.openweathermap.org/data/2.5/forecast?q=' + location + '&units=metric&cnt=50&appid=44aef6ede898ea08ff2f4d21eea9762c')
+            .then(response => response.json())
+            .then(data => {
+                if (!data || !data.list) return;
+                var start_time = 0;
+                var end_time = 40;
 
-    fetch('https://api.openweathermap.org/data/2.5/forecast?q='+location+'&units=metric&cnt=50&appid=44aef6ede898ea08ff2f4d21eea9762c')
-    .then(response => response.json())
-    .then(data => {
-        var start_time =0;
-        var end_time = 40;
+                for (var i = start_time, j = 0; i < end_time && i < data.list.length; i += 8, j++) {
+                    const tempEl = document.getElementById("day" + (j + 1) + "_temp_range");
+                    if (tempEl && data.list[i].main) {
+                        tempEl.innerHTML = "Temp Range -> " + data.list[i].main.temp_min + "° - " + data.list[i].main.temp_max + "°";
+                    }
 
-        // temperature min -max
-       
-        for(var i = start_time,j=0; i<end_time; i+=8,j++){
-            document.getElementById("day" + (j+1) + "_temp_range").innerHTML = "Temp Range -> " + data.list[i].main.temp_min+ "°"+ " - "+data.list[i].main.temp_max+"°";
-            
-        }
-    
-        // for(var i = 3,j=0; i<43; i+=8,j++){
-        //     document.getElementById("day" + (j+1) + "Max").innerHTML = "Max: " + data.list[i].main.temp_max+ "°";
-        // }
-        //------------------------------------------------------------
-    
-        //Getting Weather Icons
-         for(var i = start_time,j=0; i<end_time; i+=8,j++){
-            document.getElementById("img" + (j+1)).src = "http://openweathermap.org/img/wn/"+
-            data.list[i].weather[0].icon
-            +".png";
-        }
+                    const imgEl = document.getElementById("img" + (j + 1));
+                    if (imgEl && data.list[i].weather && data.list[i].weather[0]) {
+                        imgEl.src = "https://openweathermap.org/img/wn/" + data.list[i].weather[0].icon + ".png";
+                    }
 
-        // wind speed
-        for(var i = start_time,j=0; i<end_time; i+=8,j++){
-            document.getElementById("day" + (j+1) + "_wind").innerHTML = "Wind Speed -> " + data.list[i].wind.speed+ "m/s";
-            
-        }
+                    const windEl = document.getElementById("day" + (j + 1) + "_wind");
+                    if (windEl && data.list[i].wind) {
+                        windEl.innerHTML = "Wind Speed -> " + data.list[i].wind.speed + "m/s";
+                    }
 
-        // humidity %
-        for(var i = start_time,j=0; i<end_time; i+=8,j++){
-            document.getElementById("day" + (j+1) + "_humid").innerHTML = "Humidity -> " + data.list[i].main.humidity+ "%";
-            
-        }
+                    const humidEl = document.getElementById("day" + (j + 1) + "_humid");
+                    if (humidEl && data.list[i].main) {
+                        humidEl.innerHTML = "Humidity -> " + data.list[i].main.humidity + "%";
+                    }
 
-        // weather- description
-        for(var i = start_time,j=0; i<end_time; i+=8,j++){
-            document.getElementById("day" + (j+1) + "_desc").innerHTML = "Weather -> " + data.list[i].weather[0].description;
-            
-        }
+                    const descEl = document.getElementById("day" + (j + 1) + "_desc");
+                    if (descEl && data.list[i].weather && data.list[i].weather[0]) {
+                        descEl.innerHTML = "Weather -> " + data.list[i].weather[0].description;
+                    }
+                }
 
-        for(var i = 0; i<5; i++){
-            console.log(weekday[CheckDay(i)]);
-            document.getElementById("day"+(i+1)).innerHTML = weekday[CheckDay(i)];
-        }
-        //------------------------------------------------------------
-    })
-    
-    .catch(err => alert("Something Went Wrong: Try Checking Your Internet Coneciton"))
-
-    }
+                for (var k = 0; k < 5; k++) {
+                    const dayEl = document.getElementById("day" + (k + 1));
+                    if (dayEl) {
+                        dayEl.innerHTML = weekday[CheckDay(k)];
+                    }
+                }
+            })
+            .catch(err => {
+                console.log("Weather fetch error:", err);
+            });
+    };
     //Getting and displaying the text for the upcoming five days of the week
     var d = new Date();
     var weekday = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",];
@@ -107,9 +91,9 @@ const FarmerDashboard = () => {
                 <div className = "col-md-2 offset-md-1 icons">
                     <div className="mycard">
                     <div className="row offset-md-4 image">
-                    <img src="dots.png" className="imgClass" id="img1"/> 
+                    <img src="dots.png" alt="Weather Day 1" className="imgClass" id="img1"/> 
                     </div>
-                    <div class="weather_info">
+                    <div className="weather_info">
                         <div className="weather" id="day1"></div> 
                         <div className="temperature weather_deets" id="day1_temp_range">Loading...</div>
                         <div className="windSpeed weather_deets" id="day1_wind">Loading...</div>
@@ -121,9 +105,9 @@ const FarmerDashboard = () => {
                 <div className = "col-md-2 icons">
                     <div className="mycard">    
                         <div className="row offset-md-4 image">
-                        <img src="dots.png" className="imgClass" id="img2"/> 
+                        <img src="dots.png" alt="Weather Day 2" className="imgClass" id="img2"/> 
                         </div>
-                        <div class="weather_info">
+                        <div className="weather_info">
                             <div className="weather" id="day2"></div> 
                             <div className="temperature weather_deets" id="day2_temp_range">Loading...</div>
                             <div className="windSpeed weather_deets" id="day2_wind">Loading...</div>
@@ -135,9 +119,9 @@ const FarmerDashboard = () => {
                 <div className = "col-md-2 icons">
                     <div className="mycard">
                         <div className="row offset-md-4 image">
-                        <img src="dots.png" className="imgClass" id="img3"/> 
+                        <img src="dots.png" alt="Weather Day 3" className="imgClass" id="img3"/> 
                         </div>
-                        <div class="weather_info">
+                        <div className="weather_info">
                             <div className="weather" id="day3"></div> 
                             <div className="temperature weather_deets" id="day3_temp_range">Loading...</div>
                             <div className="windSpeed weather_deets" id="day3_wind">Loading...</div>
@@ -149,9 +133,9 @@ const FarmerDashboard = () => {
                 <div className = "col-md-2 icons">
                     <div className="mycard">
                         <div className="row offset-md-4 image">
-                        <img src="dots.png" className="imgClass" id="img4"/> 
+                        <img src="dots.png" alt="Weather Day 4" className="imgClass" id="img4"/> 
                         </div>
-                        <div class="weather_info">
+                        <div className="weather_info">
                             <div className="weather" id="day4"></div> 
                             <div className="temperature weather_deets" id="day4_temp_range">Loading...</div>
                             <div className="windSpeed weather_deets" id="day4_wind">Loading...</div>
@@ -163,9 +147,9 @@ const FarmerDashboard = () => {
                 <div className = "col-md-2 icons">
                     <div className="mycard">
                         <div className="row offset-md-4 image">
-                        <img src="dots.png" className="imgClass" id="img5"/> 
+                        <img src="dots.png" alt="Weather Day 5" className="imgClass" id="img5"/> 
                         </div>
-                        <div class="weather_info">
+                        <div className="weather_info">
                             <div className="weather" id="day5"></div> 
                             <div className="temperature weather_deets" id="day5_temp_range">Loading...</div>
                             <div className="windSpeed weather_deets" id="day5_wind">Loading...</div>
@@ -196,64 +180,50 @@ const FarmerDashboard = () => {
     };
 
     const getData = (result) => {
-        //here resolve the data
         Promise.resolve(result).then(value =>{
-            //brack the hole function to differnt function
-            console.log(value);
-            //Descriptio here
-            getRecords(value.records);
-            getDate(value.updated_date);
-		    // getDesc(value.desc);
-        })
+            if (value) {
+                if (value.records) getRecords(value.records);
+                if (value.updated_date) getDate(value.updated_date);
+            }
+        });
     };
     
     function getDate(date){
         var update = new Date(date);
-        document.getElementById('updatedOn').innerHTML = update.toDateString();
+        const updatedEl = document.getElementById('updatedOn');
+        if (updatedEl) updatedEl.innerHTML = update.toDateString();
     }
-
-    function getDesc(desc) {
-        // console.log(desc);
-        document.getElementById('description').innerHTML = desc;
-    }
-
 
     const getRecords = (record) => {
-	if(record.length==0){
-            const h = document.getElementById('mandierror');
-            h.innerHTML='Sorry! Market is Closed Today';
+        const tableBody = document.getElementById('market_price_body');
+        const mandierror = document.getElementById('mandierror');
+        if (tableBody) tableBody.innerHTML = '';
+        if (mandierror) mandierror.innerHTML = '';
+
+        if (!record || record.length === 0) {
+            if (mandierror) mandierror.innerHTML = 'Sorry! Market is Closed Today';
+            return;
         }
-        for(let i=0;i<record.length;i++) {
-            // const sr = i+1;
-            // console.log(sr);
+        for (let i = 0; i < record.length; i++) {
             const state = record[i].state;
-            // console.log(state);
             const distrcts = record[i].district;
-            // console.log(distrcts);
             const market = record[i].market;
-            // console.log(market);
             const commodity = record[i].commodity;
-            // console.log(commodity);
             const variety = record[i].variety;
-            // console.log(variety);
-            const min_price= record[i].min_price;
-            // console.log(min_price);
-            if(isNaN((min_price/100))){
+            const min_price = record[i].min_price;
+            if (isNaN((min_price / 100))) {
                 continue;
             }
             const max_price = record[i].max_price;
-            // console.log(max_price);
-            // const modal_price = record[i].modal_price;
-            // // console.log(modal_price);
             const tTr = document.createElement('tr');
             
-            tTr.innerHTML ='<td scope="row">'+state+'</td>'+'\n'+
-                '<td>'+distrcts+'</td>'+'\n'+
-                '<td>'+market+'</td>'+'\n'+
-                '<td>'+commodity+'</td>'+'\n'+
-                '<td>'+min_price / 100 +' - '+max_price / 100 +'</td>'+'\n'+
-                '<td>'+variety+'</td>'+'\n';
-            document.getElementById('market_price_body').appendChild(tTr);
+            tTr.innerHTML = '<td scope="row">' + state + '</td>\n' +
+                '<td>' + distrcts + '</td>\n' +
+                '<td>' + market + '</td>\n' +
+                '<td>' + commodity + '</td>\n' +
+                '<td>' + (min_price / 100) + ' - ' + (max_price / 100) + '</td>\n' +
+                '<td>' + variety + '</td>\n';
+            if (tableBody) tableBody.appendChild(tTr);
         }
     };
 	const FarmerLinks = () => {

@@ -21,13 +21,12 @@ const farmerRoutes = require("./routes/farmer");
 const vegetablesRoutes = require("./routes/vegetables")
 
 //database
-mongoose.connect(process.env.ONLINE_DATABASE,{
-    // useNewUrlParser:true,
-    // useCreateIndex:true,
-    // useUnifiedTopology:true
-
-}).then(()=>console.log("DB Connected"));
-
+const dbURI = process.env.ONLINE_DATABASE || process.env.DATABASE || "mongodb://127.0.0.1:27017/kisaan-portal";
+mongoose.connect(dbURI, {
+    serverSelectionTimeoutMS: 3000
+})
+    .then(() => console.log("DB Connected successfully to " + dbURI))
+    .catch(err => console.log("DB Connection error (running with offline/unconnected DB):", err.message));
 
 //middlewares
 app.use(morgan('dev'));
@@ -36,14 +35,19 @@ app.use(cookieParser());
 app.use(expressValidator());
 app.use(cors());
 
+//root route
+app.get("/", (req, res) => {
+    res.json({ message: "Kisaan Mitra Backend API is running!" });
+});
+
 //routes middleware
-app.use("/api", authRoutes)
-app.use("/api", userRoutes)
+app.use("/api", authRoutes);
+app.use("/api", userRoutes);
 app.use("/api", farmerRoutes);
-app.use("/api", vegetablesRoutes)
+app.use("/api", vegetablesRoutes);
 
-const port=process.env.PORT || 8000;
+const port = process.env.PORT || 8000;
 
-app.listen(port,()=>{
-    console.log('Server is running on '+ port);
+app.listen(port, () => {
+    console.log('Server is running on port ' + port);
 });

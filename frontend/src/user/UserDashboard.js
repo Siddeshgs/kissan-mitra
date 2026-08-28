@@ -84,45 +84,39 @@ const Dashboard = () => {
     
     function getDate(date){
         var update = new Date(date);
-        document.getElementById('updatedOn').innerHTML = update.toDateString();
+        const updatedEl = document.getElementById('updatedOn');
+        if (updatedEl) updatedEl.innerHTML = update.toDateString();
     }
 
-    
     const getRecords = (record) => {
-   	if(record.length==0){
-            const h = document.getElementById('mandierror');
-            h.innerHTML='Sorry! Market is Closed Today';
+        const tableBody = document.getElementById('market_price_body');
+        const mandierror = document.getElementById('mandierror');
+        if (tableBody) tableBody.innerHTML = '';
+        if (mandierror) mandierror.innerHTML = '';
+
+        if (!record || record.length === 0) {
+            if (mandierror) mandierror.innerHTML = 'Sorry! Market is Closed Today';
+            return;
         }
-        for(let i=0;i<record.length;i++) {
-            // const sr = i+1;
-            // console.log(sr);
+        for (let i = 0; i < record.length; i++) {
             const state = record[i].state;
-            // console.log(state);
             const distrcts = record[i].district;
-            // console.log(distrcts);
             const market = record[i].market;
-            // console.log(market);
             const commodity = record[i].commodity;
-            // console.log(commodity);
             const variety = record[i].variety;
-            // console.log(variety);
-            const min_price= record[i].min_price;
-            // console.log(min_price);
-            if(isNaN((min_price/100))){
+            const min_price = record[i].min_price;
+            if (isNaN((min_price / 100))) {
                 continue;
             }
             const max_price = record[i].max_price;
-            // console.log(max_price);
-            // const modal_price = record[i].modal_price;
-            // // console.log(modal_price);
             const tTr = document.createElement('tr');
-            tTr.innerHTML ='<td scope="row">'+state+'</td>'+'\n'+
-                '<td>'+distrcts+'</td>'+'\n'+
-                '<td>'+market+'</td>'+'\n'+
-                '<td>'+commodity+'</td>'+'\n'+
-                '<td>'+min_price / 100 +' - '+max_price / 100 +'</td>'+'\n'+
-                '<td>'+variety+'</td>'+'\n';
-            document.getElementById('market_price_body').appendChild(tTr);
+            tTr.innerHTML = '<td scope="row">' + state + '</td>\n' +
+                '<td>' + distrcts + '</td>\n' +
+                '<td>' + market + '</td>\n' +
+                '<td>' + commodity + '</td>\n' +
+                '<td>' + (min_price / 100) + ' - ' + (max_price / 100) + '</td>\n' +
+                '<td>' + variety + '</td>\n';
+            if (tableBody) tableBody.appendChild(tTr);
         }
     };
 
